@@ -1,3 +1,4 @@
+use async_trait::async_trait;
 use bitcoin::blockdata::script::Builder;
 use bitcoin::hashes::core::str::FromStr;
 use bitcoin::hashes::Hash;
@@ -6,6 +7,7 @@ use bitcoin::util::psbt::serialize::Serialize;
 use bitcoin::{Address, Network, OutPoint, PublicKey, SigHashType, Transaction, TxIn, TxOut};
 use bitcoin::{PrivateKey, Script};
 use hex::encode;
+use reqwest::Error;
 
 #[derive(Debug)]
 pub struct Account {
@@ -36,7 +38,12 @@ pub enum TxType {
     P2WPKH,
 }
 
-pub fn get_tx_hex(out_point: &str, send_amount: u64, total_amount: u64, tx_type: TxType) -> String {
+pub fn build_tx_hex(
+    out_point: &str,
+    send_amount: u64,
+    total_amount: u64,
+    tx_type: TxType,
+) -> String {
     let from_privkey = "cUDfdzioB3SqjbN9vutRTUrpw5EH9srrg6RPibacPo1fGHpfPKqL";
     let to_privkey = "cU9PYTnSkcWoAE15U26JJCwtKiYvTCKYdbWt8e7ovidEGDBwJQ5x";
     let to_acc = load_account(to_privkey);
@@ -143,4 +150,9 @@ pub fn build_spend_p2pwkh_tx(
     println!("tx hash: {:?} \n", raw_tx.txid());
 
     encode(raw_tx.serialize())
+}
+
+#[async_trait]
+pub trait BTCNetwork {
+    async fn broadcast_tx(&self, tx_hex: String) -> Result<(), Error>;
 }

@@ -12,11 +12,9 @@
 
 
 
-## 详细内容
+## prepare
 
-### prepare
-
-- account
+### 1、 account
 
   ```yaml
   # first 
@@ -30,13 +28,19 @@
   mnemonic: lazy hub spring employ rent exit differ tongue feature badge stage extend
   ```
 
-  
+### 2、rust library
 
-- faucet
+  - https://docs.rs/bitcoin/0.25.0/bitcoin/index.html
 
-  - https://testnet-faucet.mempool.co/
+### 3、Network
 
-  - https://bitcoinfaucet.uo1.net/
+#### 3.1、 TestNet
+
+ - faucet
+
+     - https://testnet-faucet.mempool.co/
+
+     - https://bitcoinfaucet.uo1.net/
 
 - broadcast tx api
 
@@ -48,11 +52,14 @@
     // params 
     {"jsonrpc":"1.0","id":"1","method":"testmempoolaccept","params":[["010000000001013a135af747f5628d1ba65fda2eea99a3e570ea047e77740402ea51479b476ff4000000000000000000010833010000000000160014a8cb707e4d0a5c6e690189bc0065a8f787aabced024830450221009c6e1af5a9c0d1fa942a462fc2f5dbb5971a4112d8f425a46822e7c38a15cfa20220173b83f0f577ceb3bea02f09f04159132e25886c5c52bd166192a1d75f1f7ba801210227de674775b35b06fca8ed06a492c817d542cc08b8d4f64d3717d4af70134d8000000000"]]}
     ```
+    
+#### 3.2、 Regtest
 
-- rust library
+部署以及运行可见[regtest.md](./regtest.md)
 
-  - https://docs.rs/bitcoin/0.25.0/bitcoin/index.html
 
+
+## 详细内容
 
 
 ### 代码实现
