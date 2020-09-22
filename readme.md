@@ -31,6 +31,7 @@
 ### 2、rust library
 
   - https://docs.rs/bitcoin/0.25.0/bitcoin/index.html
+  - https://github.com/rust-bitcoin/rust-bitcoincore-rpc
 
 ### 3、Network
 

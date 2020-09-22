@@ -1,8 +1,15 @@
-## 部署私链, 获得有效 input
+## 一、部署私链节点
+- 1、下载bitcoind and bitcoin-cli 
+  ```shell 
+    ➜   wget https://bitcoin.org/bin/bitcoin-core-0.20.0/bitcoin-0.20.0-x86_64-linux-gnu.tar.gz
+    ➜   tar -xjvf bitcoin-0.20.0-x86_64-linux-gnu.tar.gz -C ./
+    ➜   export PATH=~/work/btc/bitcoin-0.20.0/bin:$PATH
+  ```
 
-- 1、配置文件, 编辑 `/etc/bitcoin/bitcoin.conf`
 
-  ```toml
+- 2、配置文件, 编辑 `/etc/bitcoin/bitcoin.conf`
+
+  ```
   daemon=1
   server=1
   rpcuser=test
@@ -16,7 +23,7 @@
 
   
 
-- 2、启动本地私链
+- 3、启动本地私链
 
   ```shell
   ➜ bitcoind -conf=/etc/bitcoin/bitcoin.conf
@@ -25,7 +32,7 @@
 
   
 
-- 3、获取`bitcoind` 监听的端口,  本地一般是 18843
+- 4、确认`bitcoind` 监听的端口,  本地一般是 18843
 
   ```shell
   ➜  netstat --ip -lpa | grep bitcoind
@@ -34,7 +41,7 @@
 
   
 
-- 4、发送请求, 测试服务是否运行
+- 5、发送请求, 测试服务是否运行
 
   ```shell
   ➜  curl --request POST \
@@ -67,7 +74,7 @@
 
   
 
-- 5、导入私钥进钱包, 默认钱包名称为 ""
+- 6、导入私钥进钱包, 默认钱包名称为 ""
 
   ```shell
   ➜ bitcoin-cli -conf=/etc/bitcoin/bitcoin.conf  -rpcwallet="" importprivkey "cUDfdzioB3SqjbN9vutRTUrpw5EH9srrg6RPibacPo1fGHpfPKqL"
@@ -75,7 +82,7 @@
 
   
 
-- 6、构造生成块,  需要生成101个块, 如果需要使用coinbase交易, 需要100个块后确认, 最好多于100个块
+- 7、构造生成块,  需要生成101个块, 如果需要使用coinbase交易, 需要100个块后确认, 最好多于100个块
 
   ```shell
   ➜  bitcoin-cli -conf=/etc/bitcoin/bitcoin.conf generatetoaddress 101 mvuTXVzk7n9QYHMhyUUfaPdeQ4QVwA2fmT
@@ -83,7 +90,7 @@
 
   
 
-- 7、根据hash `2d9ce904ac4d0df8dffec9a9a7e2c65883c357c37bceab044fb70f3515f9720c`查询块内交易
+- 8、根据hash `2d9ce904ac4d0df8dffec9a9a7e2c65883c357c37bceab044fb70f3515f9720c`查询块内交易
 
   ```shell
   ➜  bitcoin-cli -conf=/etc/bitcoin/bitcoin.conf getblock 2d9ce904ac4d0df8dffec9a9a7e2c65883c357c37bceab044fb70f3515f9720c
@@ -115,7 +122,7 @@
 
   
 
-- 8、根据交易hash `d0bce39e8a8a52ec58e71cb0acc28f21a2d54917e9c201619454d65078766ce4` 查询交易
+- 9、根据交易hash `d0bce39e8a8a52ec58e71cb0acc28f21a2d54917e9c201619454d65078766ce4` 查询交易
 
   ```shell
   ➜  bitcoin-cli -conf=/etc/bitcoin/bitcoin.conf gettxout d0bce39e8a8a52ec58e71cb0acc28f21a2d54917e9c201619454d65078766ce4 0
@@ -140,21 +147,24 @@
 
 
 
-## 运行代码, 往私链发送交易
+## 二、构建运行，发送交易到私链
 
-- 修改代码中的配置(尚未改为文件读取配置)
+- 1、修改代码中的配置(尚未改为文件读取配置)
 
+   btc_transaction 中build_tx_hex 私钥，脚本类型，send_amount,total_amount都需要根据input进行更改
   ```toml
   # tx_hash + index 作为 交易输入
-  out_point= "a8d7ecefd3f8c60d646a246498906f78d886bf3ceec6bc1daa595b70ddde7989:0";
+  out_point= "a8d7ecefd3f8c60d646a246498906f78d886bf3ceec6bc1daa595b70ddde7989:0"
   
-  # out_point 中的total_value 需要作为参数传递(P2WPKH签名需要)
+  # out_point 中的total_amount 需要作为参数传递(P2WPKH签名需要)
+  
+  # from 的私钥必须要，to的私钥可以不需要（只需要提供脚本就可）
   
   ```
 
   
 
-- 运行
+- 2、运行, 线程执行sleep时，执行`bitcoin-cli -conf=/etc/bitcoin/bitcoin.conf generatetoaddress 1 mvuTXVzk7n9QYHMhyUUfaPdeQ4QVwA2fmT` （出块打包该交易）
 
   ```shell
   ➜  btc_tx git:(master) ✗ ~/proxyrc.sh cargo run
@@ -162,17 +172,43 @@
       Finished dev [unoptimized + debuginfo] target(s) in 29.46s
        Running `target/debug/btc_transaction`
        
-  tx hash: 44f27e38afbcf30c7559159290f754761852e0a654852aba1fbf81ca9a4f7279
+  tx hash: bf0ad48ab9b4d44ece0640f7436fe4214170e3af4392c3818a709a0a50796794
   
-  encode tx :01000000018979dedd705b59aa1dbcc6ee3cbf86d8786f909864246a640dc6f8d3efecd7a8000000006a47304402205b8205b309e6b5ebee8c8979c0f60ee82926f4389a33f3a9f40e479eb561b1f602207e46f79ce0e93b9b6b871424c9ca002f35c9351352214f47ffdf53c97250e0ca01210227de674775b35b06fca8ed06a492c817d542cc08b8d4f64d3717d4af70134d800000000001606b042a01000000160014489b80d23c5148b2f29c8b5f03478a4d0dd67a0000000000
-  
-  tx hash: 44f27e38afbcf30c7559159290f754761852e0a654852aba1fbf81ca9a4f7279
+  encode tx :010000000199b6f6f9358cf94e3ab6050b40652238d27aa353868bcea59d5abb9202d711ac000000006a473044022035a93d4fb71323df30840b9e71068bc18c7e316d9c95a021b01c7dca5bbabb1c022076d5fb1b84d3fcf859db96abd7e384b4bade179d02630dbb349c376378211a3a01210227de674775b35b06fca8ed06a492c817d542cc08b8d4f64d3717d4af70134d8000000000016072019500000000160014489b80d23c5148b2f29c8b5f03478a4d0dd67a0000000000
+  tx hash: bf0ad48ab9b4d44ece0640f7436fe4214170e3af4392c3818a709a0a50796794
   
   check_merkle_root :true
   
-  merkle_root : f078fd2f40a13f228f937add80bd996aa2a69e389d386843f8355fcdbf77da7a
+  merkle_root : 9a3cb7f9e3ff1b434a38bd267e9c25a95ed4ee461b761252ed38bd9f75f35975
   
-  best proof : 00000030ca889853e7337822f2673f6153b92f4ba376ff823b5b2d262dc2c49e60cd24717ada77bfcd5f35f84368389d389ea6a26a99bd80dd7a938f223fa1402ffd78f0e2ca685fffff7f2002000000020000000205bdb64475a0efd9d05c6d25ff44a69959579edb08d71cbf745baee3ce634ead79724f9aca81bf1fba2a8554a6e052187654f790921559750cf3bcaf387ef2440105
+  best proof : 00000030ca889853e7337822f2673f6153b92f4ba376ff823b5b2d262dc2c49e60cd24717559f3759fbd38ed5212761b46eed45ea9259c7e26bd384a431bffe3f9b73c9a73a6695fffff7f20000000000300000002f707925e6d07fc7dc7ec5967091c69f227c76b19b55319d4ffdd17107b71b5c6946779500a9a708a81c39243afe3704121e46f43f74006ce4ed4b4b98ad40abf010d
   ```
+  
+- 3、验证，查询交易`bf0ad48ab9b4d44ece0640f7436fe4214170e3af4392c3818a709a0a50796794` 的output
+  ```shell script
+    ➜  bitcoin-cli -conf=/etc/bitcoin/bitcoin.conf generatetoaddress 1 mvuTXVzk7n9QYHMhyUUfaPdeQ4QVwA2fmT
+    [
+      "402b8f550a1cbeb112e834f04092a68abe5972238da23074c54eec87353b78d9"
+    ]
+    ➜  bitcoin-cli -conf=/etc/bitcoin/bitcoin.conf gettxout bf0ad48ab9b4d44ece0640f7436fe4214170e3af4392c3818a709a0a50796794 0
+    {
+      "bestblock": "402b8f550a1cbeb112e834f04092a68abe5972238da23074c54eec87353b78d9",
+      "confirmations": 1,
+      "value": 24.99900000,
+      "scriptPubKey": {
+        "asm": "0 489b80d23c5148b2f29c8b5f03478a4d0dd67a00",
+        "hex": "0014489b80d23c5148b2f29c8b5f03478a4d0dd67a00",
+        "reqSigs": 1,
+        "type": "witness_v0_keyhash", # output 为 P2WPKH 脚本
+        "addresses": [
+          "bcrt1qfzdcp53u29yt9u5u3d0sx3u2f5xav7sqatfxm2"
+        ]
+      },
+      "coinbase": false
+    }
+   ```
 
   
+  ## 参考文档
+  
+[bitcoin 0.20 rpc文档](https://dg0.dtrt.org/en/doc/0.20.0/rpc/blockchain/getblock/)

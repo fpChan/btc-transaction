@@ -4,6 +4,44 @@ use reqwest::Error;
 use serde::Deserialize;
 use std::{thread, time};
 
+/*
+ we can send the raw transaction to testnet by the api which provided by some explorer which maintain full node
+    https://testnet-api.smartbit.com.au/v1/blockchain/
+    https://api.bitaps.com/btc/testnet/native/
+    https://api.blockcypher.com/v1/btc/test3/
+*/
+
+pub struct TestnetConf {
+    pub(crate) submit_tx_url: String,
+    pub(crate) query_tx_url: String,
+}
+
+impl Default for TestnetConf {
+    fn default() -> Self {
+        TestnetConf {
+            submit_tx_url: "https://api.bitaps.com/btc/testnet/".to_string(),
+            query_tx_url: "https://api.blockcypher.com/v1/btc/test3/".to_string(),
+        }
+    }
+}
+
+#[async_trait]
+impl BTCNetwork for TestnetConf {
+    async fn broadcast_tx(&self, tx_hex: String) -> Result<(), Error> {
+        let broadcast_node = Bitaps {
+            url: self.submit_tx_url.clone(),
+        };
+        let explorer = Blockcypher {
+            url: self.query_tx_url.clone(),
+        };
+        let tx_hash = broadcast_node.submit_tx(tx_hex).await?;
+
+        thread::sleep(time::Duration::from_secs(60 * 10));
+
+        explorer.fetch_merkle_root(tx_hash).await
+    }
+}
+
 #[async_trait]
 pub trait Explorer {
     async fn fetch_merkle_root(&self, tx_hash: String) -> Result<(), Error>;
@@ -90,41 +128,5 @@ impl BroadcastNode for Bitaps {
             println!("broadcast tx fail: {:?}", result.error.unwrap());
         }
         Ok((result.result.unwrap()))
-    }
-}
-
-pub struct TestnetConf {
-    pub(crate) submit_tx_url: String,
-    pub(crate) query_tx_url: String,
-}
-
-impl Default for TestnetConf {
-    fn default() -> Self {
-        TestnetConf {
-            submit_tx_url: "https://api.bitaps.com/btc/testnet/".to_string(),
-            query_tx_url: "https://api.blockcypher.com/v1/btc/test3/".to_string(),
-        }
-    }
-}
-/*
-https://testnet-api.smartbit.com.au/v1/blockchain/
-https://api.bitaps.com/btc/testnet/native/
-https://api.blockcypher.com/v1/btc/test3/
-*/
-
-#[async_trait]
-impl BTCNetwork for TestnetConf {
-    async fn broadcast_tx(&self, tx_hex: String) -> Result<(), Error> {
-        let broadcast_node = Bitaps {
-            url: self.submit_tx_url.clone(),
-        };
-        let explorer = Blockcypher {
-            url: self.query_tx_url.clone(),
-        };
-        let tx_hash = broadcast_node.submit_tx(tx_hex).await?;
-
-        thread::sleep(time::Duration::from_secs(60 * 10));
-
-        explorer.fetch_merkle_root(tx_hash).await
     }
 }

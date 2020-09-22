@@ -38,12 +38,11 @@ pub enum TxType {
     P2WPKH,
 }
 
-pub fn build_tx_hex(
-    out_point: &str,
-    send_amount: u64,
-    total_amount: u64,
-    tx_type: TxType,
-) -> String {
+pub fn build_tx_hex(tx_type: TxType) -> String {
+    let out_point = "ac11d70292bb5a9da5ce8b8653a37ad2382265400b05b63a4ef98c35f9f6b699:0";
+    let send_amount = 2499900000;
+    let total_amount = 2500000000;
+
     let from_privkey = "cUDfdzioB3SqjbN9vutRTUrpw5EH9srrg6RPibacPo1fGHpfPKqL";
     let to_privkey = "cU9PYTnSkcWoAE15U26JJCwtKiYvTCKYdbWt8e7ovidEGDBwJQ5x";
     let to_acc = load_account(to_privkey);

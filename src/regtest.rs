@@ -31,7 +31,7 @@ impl BTCNetwork for RegtestConf {
         .unwrap();
 
         let txid = rpc.send_raw_transaction(tx_hex).unwrap();
-        println!(" tx hash: {}", txid);
+        println!(" tx hash: {} \n", txid);
 
         // execute cmd ` bitcoin-cli -conf=/etc/bitcoin/bitcoin.conf generatetoaddress 1 mvuTXVzk7n9QYHMhyUUfaPdeQ4QVwA2fmT`  in 60 secs.
         thread::sleep(time::Duration::from_secs(60 * 1));
@@ -40,12 +40,12 @@ impl BTCNetwork for RegtestConf {
         let tx_result = rpc.get_transaction(&txid, None).unwrap();
         let block_hash = tx_result.info.blockhash.unwrap();
         let block = rpc.get_block(&block_hash).unwrap();
-        println!("check_merkle_root :{}", block.check_merkle_root());
-        println!("merkle_root : {}", block.header.merkle_root.to_string());
+        println!("check_merkle_root :{}\n", block.check_merkle_root());
+        println!("merkle_root : {}\n", block.header.merkle_root.to_string());
         let proof = rpc
             .get_tx_out_proof(&*txs, Option::from(&block_hash))
             .unwrap();
-        println!("best proof : {}", encode(proof));
+        println!("best proof : {}\n", encode(proof));
         Ok(())
     }
 }
