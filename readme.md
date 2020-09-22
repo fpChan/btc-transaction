@@ -1,14 +1,14 @@
-## 需求背景
+## 一、 需求背景
 
 在实现跨链转账的`demo `中，当`BTC`链收到交易信号时，需要从`BTC`链 地址A 往 地址B 发送`btc`，获得 `merkle root` 进行以便后续验证。需要完成这部分功能
 
 
 
-## 大致思路
+## 二、大致思路
 
 目前在 `Bitcoin Testnet ` 实现， 发送 `P2PKH` 交易、 `P2WPKH` 交易
 
-从水龙头获取`BTC` 测试币，通过现有的一些 [`btc rust lib`](https://docs.rs/bitcoin/0.25.0/bitcoin/index.html)   构造交易，签名， 发送交易到一些[全节点站点]() (自行部署测试网节点 成本较高)
+从水龙头获取`BTC` 测试币，通过现有的一些 [`btc rust lib`](https://docs.rs/bitcoin/0.25.0/bitcoin/index.html)   构造交易，签名， 发送交易到一些全节点 (自行部署测试网节点 成本较高)
 
 
 
@@ -35,7 +35,7 @@
 
 ### 3、Network
 
-#### 3.1、 TestNet
+#### 3.1、 Testnet
 
  - faucet
 
@@ -60,7 +60,7 @@
 
 
 
-## 详细内容
+## 三、详细内容
 
 
 ### 代码实现
@@ -69,6 +69,12 @@
 
 ####  `P2PKH` 
 
+将 `P2PKH` 脚本作为 input，将 `P2WPKH`  作为 output
 
+构造（签名 + 公钥）  作为解锁脚本
 
 ####  `P2WPKH` 
+
+将 `P2WPKH` 脚本作为 input，将 `P2PKH`  作为 output
+
+构造（签名 + 公钥）作为 [witness](https://github.com/fpChan/btc-transaction/blob/5c83e5a705f55155867316978453a6bff98999a0/src/btc_transaction.rs#L142)
